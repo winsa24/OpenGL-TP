@@ -17,8 +17,8 @@ void main() {
 // TODO: vec3 ambient = set an ambient color
 	vec3 ambient = vec3(0.3, 0.3, 0.3);
 // TODO: vec3 diffuse = calculate the diffuse lighting
-	//vec4 n1 = vec4(n)
-	vec3 diffuse = vec3(1.0) * dot(n, l);
+	//vec3 diffuse = vec3(1.0) * dot(n, l);
+	vec3 diffuse = l * dot(n, l);
 // TODO: vec3 specular = calculate the specular lighting
 	vec3 specular = (r * v);
 	
