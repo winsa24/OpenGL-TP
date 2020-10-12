@@ -1,4 +1,4 @@
-# Install script for directory: /Users/weixiang/Downloads/TP00-OpenGL-Mac/src/glad
+# Install script for directory: /Users/weixiang/Downloads/TP00-OpenGL-Mac/OpenGL-TP/src/glad
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

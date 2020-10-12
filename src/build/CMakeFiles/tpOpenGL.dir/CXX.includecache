@@ -18,7 +18,7 @@ stdint.h
 KHR/khrplatform.h
 -
 
-/Users/weixiang/Downloads/TP00-OpenGL-Mac/src/main.cpp
+/Users/weixiang/Downloads/TP00-OpenGL-Mac/OpenGL-TP/src/main.cpp
 glad/glad.h
 -
 GLFW/glfw3.h
@@ -46,11 +46,11 @@ memory
 math.h
 -
 stb_image.h
-/Users/weixiang/Downloads/TP00-OpenGL-Mac/src/stb_image.h
+/Users/weixiang/Downloads/TP00-OpenGL-Mac/OpenGL-TP/src/stb_image.h
 
-/Users/weixiang/Downloads/TP00-OpenGL-Mac/src/stb_image.h
+/Users/weixiang/Downloads/TP00-OpenGL-Mac/OpenGL-TP/src/stb_image.h
 stb_image.h
-/Users/weixiang/Downloads/TP00-OpenGL-Mac/src/stb_image.h
+/Users/weixiang/Downloads/TP00-OpenGL-Mac/OpenGL-TP/src/stb_image.h
 stdio.h
 -
 stdlib.h

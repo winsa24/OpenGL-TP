@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/Users/weixiang/Downloads/TP00-OpenGL-Mac/src/main.cpp" "/Users/weixiang/Downloads/TP00-OpenGL-Mac/src/build/CMakeFiles/tpOpenGL.dir/main.cpp.o"
+  "/Users/weixiang/Downloads/TP00-OpenGL-Mac/OpenGL-TP/src/main.cpp" "/Users/weixiang/Downloads/TP00-OpenGL-Mac/OpenGL-TP/src/build/CMakeFiles/tpOpenGL.dir/main.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "AppleClang")
 
@@ -16,7 +16,7 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
 
 # Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
-  "/Users/weixiang/Downloads/TP00-OpenGL-Mac/src/build/glad/CMakeFiles/glad.dir/DependInfo.cmake"
+  "/Users/weixiang/Downloads/TP00-OpenGL-Mac/OpenGL-TP/src/build/glad/CMakeFiles/glad.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

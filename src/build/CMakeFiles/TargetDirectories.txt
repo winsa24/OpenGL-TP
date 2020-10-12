@@ -1,6 +1,6 @@
-/Users/weixiang/Downloads/TP00-OpenGL-Mac/src/build/CMakeFiles/rebuild_cache.dir
-/Users/weixiang/Downloads/TP00-OpenGL-Mac/src/build/CMakeFiles/edit_cache.dir
-/Users/weixiang/Downloads/TP00-OpenGL-Mac/src/build/CMakeFiles/tpOpenGL.dir
-/Users/weixiang/Downloads/TP00-OpenGL-Mac/src/build/glad/CMakeFiles/rebuild_cache.dir
-/Users/weixiang/Downloads/TP00-OpenGL-Mac/src/build/glad/CMakeFiles/edit_cache.dir
-/Users/weixiang/Downloads/TP00-OpenGL-Mac/src/build/glad/CMakeFiles/glad.dir
+/Users/weixiang/Downloads/TP00-OpenGL-Mac/OpenGL-TP/src/build/CMakeFiles/rebuild_cache.dir
+/Users/weixiang/Downloads/TP00-OpenGL-Mac/OpenGL-TP/src/build/CMakeFiles/edit_cache.dir
+/Users/weixiang/Downloads/TP00-OpenGL-Mac/OpenGL-TP/src/build/CMakeFiles/tpOpenGL.dir
+/Users/weixiang/Downloads/TP00-OpenGL-Mac/OpenGL-TP/src/build/glad/CMakeFiles/rebuild_cache.dir
+/Users/weixiang/Downloads/TP00-OpenGL-Mac/OpenGL-TP/src/build/glad/CMakeFiles/edit_cache.dir
+/Users/weixiang/Downloads/TP00-OpenGL-Mac/OpenGL-TP/src/build/glad/CMakeFiles/glad.dir

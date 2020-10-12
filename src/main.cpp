@@ -54,11 +54,89 @@ std::vector<float> g_vertexPositions;
 std::vector<unsigned int> g_triangleIndices;
 std::vector<float> g_vertexColors;
 
+
+
+
+
+
+// Basic camera model
+class Camera {
+public:
+  inline float getFov() const { return m_fov; }
+  inline void setFoV(const float f) { m_fov = f; }
+  inline float getAspectRatio() const { return m_aspectRatio; }
+  inline void setAspectRatio(const float a) { m_aspectRatio = a; }
+  inline float getNear() const { return m_near; }
+  inline void setNear(const float n) { m_near = n; }
+  inline float getFar() const { return m_far; }
+  inline void setFar(const float n) { m_far = n; }
+  inline void setPosition(const glm::vec3 &p) { m_pos = p; }
+  inline glm::vec3 getPosition() { return m_pos; }
+
+  inline glm::mat4 computeViewMatrix() const {
+    return glm::lookAt(m_pos, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+  }
+
+  // Returns the projection matrix stemming from the camera intrinsic parameter.
+  inline glm::mat4 computeProjectionMatrix() const {
+    return glm::perspective(glm::radians(m_fov), m_aspectRatio, m_near, m_far);
+  }
+
+private:
+  glm::vec3 m_pos = glm::vec3(0, 0, 0);
+  float m_fov = 45.f;        // Field of view, in degrees
+  float m_aspectRatio = 1.f; // Ratio between the width and the height of the image
+  float m_near = 0.1f; // Distance before which geometry is excluded fromt he rasterization process
+  float m_far = 10.f; // Distance after which the geometry is excluded fromt he rasterization process
+};
+Camera g_camera;
+
 // main.cpp ...
 class Mesh {
 public:
-    void init(); // should properly set up the geometry buffer
-    void render(); // should be called in the main rendering loop
+    void init(){// should properly set up the geometry buffer
+        glGenVertexArrays(1, &m_vao); // If your system doesn't support OpenGL 4.5, you should use this instead of glCreateVertexArrays.
+        glBindVertexArray(m_vao);
+
+        // Generate a GPU buffer to store the positions of the vertices
+        size_t vertexBufferSize = sizeof(float)*m_vertexPositions.size(); // Gather the size of the buffer from the CPU-side vector
+
+        // If your system doesn't support OpenGL 4.5, you should replace the upper code block with this.
+        glGenBuffers(1, &m_posVbo);
+        glBindBuffer(GL_ARRAY_BUFFER, m_posVbo);
+        glBufferData(GL_ARRAY_BUFFER, vertexBufferSize, m_vertexPositions.data(), GL_DYNAMIC_READ);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), 0);
+
+        size_t colorBufferSize = sizeof(float)*m_vertexNormals.size();
+        glGenBuffers(1, &m_normalVbo);
+        glBindBuffer(GL_ARRAY_BUFFER, m_normalVbo);
+        glBufferData(GL_ARRAY_BUFFER, colorBufferSize, m_vertexNormals.data(), GL_DYNAMIC_READ);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), 0);
+
+        glBindVertexArray(0); // deactivate the VAO for now, will be activated at rendering time
+
+        // Same for the index buffer that stores the list of indices of the
+        // triangles forming the mesh
+        size_t indexBufferSize = sizeof(unsigned int)*m_triangleIndices.size();
+        glGenBuffers(1, &m_ibo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSize, m_triangleIndices.data(), GL_DYNAMIC_READ);
+    };
+    void render(){// should be called in the main rendering loop
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Erase the color and z buffers.
+
+        const glm::mat4 viewMatrix = g_camera.computeViewMatrix();
+        const glm::mat4 projMatrix = g_camera.computeProjectionMatrix();
+
+        glUniformMatrix4fv(glGetUniformLocation(g_program, "viewMat"), 1, GL_FALSE, glm::value_ptr(viewMatrix)); // compute the view matrix of the camera and pass it to the GPU program
+        glUniformMatrix4fv(glGetUniformLocation(g_program, "projMat"), 1, GL_FALSE, glm::value_ptr(projMatrix)); // compute the projection matrix of the camera and pass it to the GPU program
+
+        glBindVertexArray(m_vao);     // bind the VAO storing geometry data
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo); // bind the IBO storing geometry data
+        glDrawElements(GL_TRIANGLES, m_triangleIndices.size(), GL_UNSIGNED_INT, 0); // Call for rendering: stream the current GPU geometry through the current GPU program
+    };
     //static std::shared_ptr<Mesh> genSphere(const size_t resolution=16); // should generate a unit sphere
     void genSphere(){
         float x, y, z, xy;                              // vertex position
@@ -144,41 +222,8 @@ private:
 // ...
 
 };
-
+Mesh sphere;
 //std::shared_ptr<Mesh> Mesh:: genSphere(){
-
-
-// Basic camera model
-class Camera {
-public:
-  inline float getFov() const { return m_fov; }
-  inline void setFoV(const float f) { m_fov = f; }
-  inline float getAspectRatio() const { return m_aspectRatio; }
-  inline void setAspectRatio(const float a) { m_aspectRatio = a; }
-  inline float getNear() const { return m_near; }
-  inline void setNear(const float n) { m_near = n; }
-  inline float getFar() const { return m_far; }
-  inline void setFar(const float n) { m_far = n; }
-  inline void setPosition(const glm::vec3 &p) { m_pos = p; }
-  inline glm::vec3 getPosition() { return m_pos; }
-
-  inline glm::mat4 computeViewMatrix() const {
-    return glm::lookAt(m_pos, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-  }
-
-  // Returns the projection matrix stemming from the camera intrinsic parameter.
-  inline glm::mat4 computeProjectionMatrix() const {
-    return glm::perspective(glm::radians(m_fov), m_aspectRatio, m_near, m_far);
-  }
-
-private:
-  glm::vec3 m_pos = glm::vec3(0, 0, 0);
-  float m_fov = 45.f;        // Field of view, in degrees
-  float m_aspectRatio = 1.f; // Ratio between the width and the height of the image
-  float m_near = 0.1f; // Distance before which geometry is excluded fromt he rasterization process
-  float m_far = 10.f; // Distance after which the geometry is excluded fromt he rasterization process
-};
-Camera g_camera;
 
 GLuint loadTextureFromFileToGPU(const std::string &filename) {
   int width, height, numComponents;
@@ -426,9 +471,8 @@ void task2(){
 void initCPUgeometry() {
   // TODO:
 
-    Mesh sphere;
+    //task2();
     sphere.genSphere();
-
 
 }
 
@@ -482,6 +526,8 @@ void initGPUgeometry() {
   glGenBuffers(1, &g_ibo);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_ibo);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSize, g_triangleIndices.data(), GL_DYNAMIC_READ);
+
+  sphere.init();
 }
 
 void initCamera() {
@@ -527,6 +573,8 @@ void render() {
   glBindVertexArray(g_vao);     // bind the VAO storing geometry data
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_ibo); // bind the IBO storing geometry data
   glDrawElements(GL_TRIANGLES, g_triangleIndices.size(), GL_UNSIGNED_INT, 0); // Call for rendering: stream the current GPU geometry through the current GPU program
+
+    sphere.render();
 }
 
 // Update any accessible variable based on the current time
