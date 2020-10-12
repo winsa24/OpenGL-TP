@@ -55,10 +55,6 @@ std::vector<unsigned int> g_triangleIndices;
 std::vector<float> g_vertexColors;
 
 
-
-
-
-
 // Basic camera model
 class Camera {
 public:
@@ -123,6 +119,8 @@ public:
         glGenBuffers(1, &m_ibo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSize, m_triangleIndices.data(), GL_DYNAMIC_READ);
+
+
     };
     void render(){// should be called in the main rendering loop
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Erase the color and z buffers.
@@ -133,9 +131,13 @@ public:
         glUniformMatrix4fv(glGetUniformLocation(g_program, "viewMat"), 1, GL_FALSE, glm::value_ptr(viewMatrix)); // compute the view matrix of the camera and pass it to the GPU program
         glUniformMatrix4fv(glGetUniformLocation(g_program, "projMat"), 1, GL_FALSE, glm::value_ptr(projMatrix)); // compute the projection matrix of the camera and pass it to the GPU program
 
+        const glm::vec3 camPosition = g_camera.getPosition();
+        glUniform3f(glGetUniformLocation(g_program, "camPos"), camPosition[0], camPosition[1], camPosition[2]);
+
         glBindVertexArray(m_vao);     // bind the VAO storing geometry data
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo); // bind the IBO storing geometry data
         glDrawElements(GL_TRIANGLES, m_triangleIndices.size(), GL_UNSIGNED_INT, 0); // Call for rendering: stream the current GPU geometry through the current GPU program
+
     };
     //static std::shared_ptr<Mesh> genSphere(const size_t resolution=16); // should generate a unit sphere
     void genSphere(){
@@ -169,8 +171,6 @@ public:
                 m_vertexPositions.push_back(x);
                 m_vertexPositions.push_back(y);
                 m_vertexPositions.push_back(z);
-
-
 
                 //normalized vertex normal (nx, ny, nz)
                 nx = x * lengthInv;
@@ -341,38 +341,39 @@ void initGPUprogram() {
   glUseProgram(g_program);
 }
 
+
 void task1(){
 
-    //    g_vertexPositions.push_back(0);
-    //    g_vertexPositions.push_back(0);
-    //    g_vertexPositions.push_back(0);
-    //    g_vertexPositions.push_back(1.0);
-    //    g_vertexPositions.push_back(0);
-    //    g_vertexPositions.push_back(0);
-    //    g_vertexPositions.push_back(0);
-    //    g_vertexPositions.push_back(1.0);
-    //    g_vertexPositions.push_back(0);
+        g_vertexPositions.push_back(0);
+        g_vertexPositions.push_back(0);
+        g_vertexPositions.push_back(0);
+        g_vertexPositions.push_back(1.0);
+        g_vertexPositions.push_back(0);
+        g_vertexPositions.push_back(0);
+        g_vertexPositions.push_back(0);
+        g_vertexPositions.push_back(1.0);
+        g_vertexPositions.push_back(0);
     //    g_vertexPositions = { // the array of vertex positions [x0, y0, z0, x1, y1, z1, ...]
     //        0.f, 0.f, 0.f,
     //        1.f, 0.f, 0.f,
     //        0.f, 1.f, 0.f
     //    };
-    //    g_triangleIndices.push_back(0);
-    //    g_triangleIndices.push_back(1);
-    //    g_triangleIndices.push_back(2);
+        g_triangleIndices.push_back(0);
+        g_triangleIndices.push_back(1);
+        g_triangleIndices.push_back(2);
         //g_triangleIndices = { 0, 1, 2 }; // indices just for one triangle
 
-    //    g_vertexColors.push_back(1.0);
-    //    g_vertexColors.push_back(1.0);
-    //    g_vertexColors.push_back(0.0);
+        g_vertexColors.push_back(1.0);
+        g_vertexColors.push_back(1.0);
+        g_vertexColors.push_back(0.0);
 
-    //    g_vertexColors.push_back(0.0);
-    //    g_vertexColors.push_back(1.0);
-    //    g_vertexColors.push_back(0.0);
+        g_vertexColors.push_back(0.0);
+        g_vertexColors.push_back(1.0);
+        g_vertexColors.push_back(0.0);
 
-    //    g_vertexColors.push_back(0.0);
-    //    g_vertexColors.push_back(0.0);
-    //    g_vertexColors.push_back(1.0);
+        g_vertexColors.push_back(0.0);
+        g_vertexColors.push_back(0.0);
+        g_vertexColors.push_back(1.0);
 
 
     //    g_vertexColors = { // the array of vertex colors [r0, g0, b0, r1, g1, b1, ...]
