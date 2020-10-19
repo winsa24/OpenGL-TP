@@ -122,33 +122,34 @@ public:
 
 
     };
-    void render(){// should be called in the main rendering loop
+    void render(glm::mat4 g_mesh){// should be called in the main rendering loop
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Erase the color and z buffers.
 
-        const glm::mat4 viewMatrix = g_camera.computeViewMatrix();
-        const glm::mat4 projMatrix = g_camera.computeProjectionMatrix();
+        //const glm::mat4 viewMatrix = g_sphere.computeViewMatrix();
+//        const glm::mat4 projMatrix = g_camera.computeProjectionMatrix();
 
-        glUniformMatrix4fv(glGetUniformLocation(g_program, "viewMat"), 1, GL_FALSE, glm::value_ptr(viewMatrix)); // compute the view matrix of the camera and pass it to the GPU program
-        glUniformMatrix4fv(glGetUniformLocation(g_program, "projMat"), 1, GL_FALSE, glm::value_ptr(projMatrix)); // compute the projection matrix of the camera and pass it to the GPU program
-
-        const glm::vec3 camPosition = g_camera.getPosition();
-        glUniform3f(glGetUniformLocation(g_program, "camPos"), camPosition[0], camPosition[1], camPosition[2]);
+        glUniformMatrix4fv(glGetUniformLocation(g_program, "meshMat"), 1, GL_FALSE, glm::value_ptr(g_mesh)); // compute the view matrix of the camera and pass it to the GPU program
+//        glUniformMatrix4fv(glGetUniformLocation(g_program, "projMat"), 1, GL_FALSE, glm::value_ptr(projMatrix)); // compute the projection matrix of the camera and pass it to the GPU program
 
         glBindVertexArray(m_vao);     // bind the VAO storing geometry data
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo); // bind the IBO storing geometry data
         glDrawElements(GL_TRIANGLES, m_triangleIndices.size(), GL_UNSIGNED_INT, 0); // Call for rendering: stream the current GPU geometry through the current GPU program
 
     };
-    //static std::shared_ptr<Mesh> genSphere(const size_t resolution=16); // should generate a unit sphere
-    void genSphere(){
+    //void genSphere(){
+    static std::shared_ptr<Mesh> genSphere(const size_t resolution=16){
+        Mesh myMesh;
+
         float x, y, z, xy;                              // vertex position
+    //    float radius = kSize;
         float radius = 1.0f;
         float PI = 3.14159265;
         float nx, ny, nz, lengthInv = 1.0f / radius;    // vertex normal
     //    float s, t;                                     // vertex texCoord
 
-        int sectorCount = 16;
-        int stackCount = 16;
+        int sectorCount = 32;
+        int stackCount = 32;
         float sectorStep = 2 * PI / sectorCount;
         float stackStep = PI / stackCount;
         float sectorAngle, stackAngle;
@@ -168,17 +169,20 @@ public:
                 // vertex position (x, y, z)
                 x = xy * cosf(sectorAngle);             // r * cos(u) * cos(v)
                 y = xy * sinf(sectorAngle);             // r * cos(u) * sin(v)
-                m_vertexPositions.push_back(x);
-                m_vertexPositions.push_back(y);
-                m_vertexPositions.push_back(z);
+                myMesh.m_vertexPositions.push_back(x);
+                myMesh.m_vertexPositions.push_back(y);
+                myMesh.m_vertexPositions.push_back(z);
 
                 //normalized vertex normal (nx, ny, nz)
                 nx = x * lengthInv;
                 ny = y * lengthInv;
                 nz = z * lengthInv;
-                m_vertexNormals.push_back(nx);
-                m_vertexNormals.push_back(ny);
-                m_vertexNormals.push_back(nz);
+    //            m_vertexNormals.push_back(nx);
+    //            m_vertexNormals.push_back(ny);
+    //            m_vertexNormals.push_back(nz);
+                myMesh.m_vertexNormals.push_back(x);
+                myMesh.m_vertexNormals.push_back(y);
+                myMesh.m_vertexNormals.push_back(z);
 
             }
         }
@@ -194,22 +198,24 @@ public:
                 // k1 => k2 => k1+1
                 if(i != 0)
                 {
-                    m_triangleIndices.push_back(k1);
-                    m_triangleIndices.push_back(k2);
-                    m_triangleIndices.push_back(k1 + 1);
+                    myMesh.m_triangleIndices.push_back(k1);
+                    myMesh.m_triangleIndices.push_back(k2);
+                    myMesh.m_triangleIndices.push_back(k1 + 1);
                 }
 
                 // k1+1 => k2 => k2+1
                 if(i != (stackCount-1))
                 {
-                    m_triangleIndices.push_back(k1 + 1);
-                    m_triangleIndices.push_back(k2);
-                    m_triangleIndices.push_back(k2 + 1);
+                    myMesh.m_triangleIndices.push_back(k1 + 1);
+                    myMesh.m_triangleIndices.push_back(k2);
+                    myMesh.m_triangleIndices.push_back(k2 + 1);
                 }
             }
         }
 
-    };
+        std::shared_ptr<Mesh> sptr = std::make_shared<Mesh>(myMesh);
+        return sptr;
+    }; // should generate a unit sphere
 // ...
 private:
     std::vector<float> m_vertexPositions;
@@ -222,8 +228,21 @@ private:
 // ...
 
 };
-Mesh sphere;
-//std::shared_ptr<Mesh> Mesh:: genSphere(){
+//void Mesh:: genSphere(){
+
+
+// Constants
+const static float kSizeSun = 1;
+const static float kSizeEarth = 0.5;
+const static float kSizeMoon = 0.25;
+const static float kRadOrbitEarth = 10;
+const static float kRadOrbitMoon = 2;
+// Model transformation matrices
+glm::mat4 g_sun, g_earth, g_moon;
+//Mesh sphere;
+//Mesh sun, earth, moon;
+std::shared_ptr<Mesh> sun_ptr, moon_ptr;
+std::shared_ptr<Mesh> earth_ptr;
 
 GLuint loadTextureFromFileToGPU(const std::string &filename) {
   int width, height, numComponents;
@@ -344,13 +363,13 @@ void initGPUprogram() {
 
 void task1(){
 
-        g_vertexPositions.push_back(0);
+        g_vertexPositions.push_back(0.0);
         g_vertexPositions.push_back(0);
         g_vertexPositions.push_back(0);
         g_vertexPositions.push_back(1.0);
         g_vertexPositions.push_back(0);
         g_vertexPositions.push_back(0);
-        g_vertexPositions.push_back(0);
+        g_vertexPositions.push_back(0.0);
         g_vertexPositions.push_back(1.0);
         g_vertexPositions.push_back(0);
     //    g_vertexPositions = { // the array of vertex positions [x0, y0, z0, x1, y1, z1, ...]
@@ -472,8 +491,15 @@ void task2(){
 void initCPUgeometry() {
   // TODO:
 
+    //task1();
     //task2();
-    sphere.genSphere();
+
+    //sun_ptr->genSphere();
+    sun_ptr = Mesh::genSphere();
+    //earth_ptr = Mesh::genSphere();
+    //moon_ptr = Mesh::genSphere();
+    //sun.genSphere();
+    //sphere.genSphere();
 
 }
 
@@ -528,20 +554,27 @@ void initGPUgeometry() {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_ibo);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSize, g_triangleIndices.data(), GL_DYNAMIC_READ);
 
-  sphere.init();
+  //sphere.init();
+  sun_ptr->init();
+  //earth_ptr->init();
+  //moon_ptr->init();
+
 }
 
 void initCamera() {
   //std::cout << "qwr5" << std::endl;
+  //glm::mat4 g_sun, g_earth, g_moon;
 
   int width, height;
   glfwGetWindowSize(g_window, &width, &height);
   g_camera.setAspectRatio(static_cast<float>(width)/static_cast<float>(height));
 
   g_camera.setPosition(glm::vec3(0.0, 0.0, 3.0));
+
   g_camera.setNear(0.1);
   g_camera.setFar(80.1);
-  //std::cout << "qwr4" << std::endl;
+
+
 }
 
 void init() {
@@ -571,11 +604,28 @@ void render() {
   glUniformMatrix4fv(glGetUniformLocation(g_program, "viewMat"), 1, GL_FALSE, glm::value_ptr(viewMatrix)); // compute the view matrix of the camera and pass it to the GPU program
   glUniformMatrix4fv(glGetUniformLocation(g_program, "projMat"), 1, GL_FALSE, glm::value_ptr(projMatrix)); // compute the projection matrix of the camera and pass it to the GPU program
 
+  const glm::vec3 camPosition = g_camera.getPosition();
+  glUniform3f(glGetUniformLocation(g_program, "camPos"), camPosition[0], camPosition[1], camPosition[2]);
+
   glBindVertexArray(g_vao);     // bind the VAO storing geometry data
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_ibo); // bind the IBO storing geometry data
   glDrawElements(GL_TRIANGLES, g_triangleIndices.size(), GL_UNSIGNED_INT, 0); // Call for rendering: stream the current GPU geometry through the current GPU program
 
-    sphere.render();
+  g_sun = glm::mat4(1.0);
+  g_sun = glm::translate(g_sun, glm::vec3(0.0f, 0.0f, 0.0f));
+  g_sun = glm::scale(g_sun, glm::vec3(0.1f, 0.1f, 0.1f));
+  g_earth = glm::mat4(1.0);
+  g_earth = glm::translate(g_earth, glm::vec3(0.2f, 0.0f, 0.0f));
+  g_earth = glm::scale(g_earth, glm::vec3(0.05f, 0.05f, 0.05f));
+  g_moon = glm::mat4(1.0);
+  g_moon = glm::translate(g_moon, glm::vec3(1.0f, 0.0f, 0.0f));
+  g_moon = glm::scale(g_moon, glm::vec3(0.025f, 0.025f, 0.025f));
+
+  sun_ptr->render(g_sun);
+  sun_ptr->render(g_earth);
+  sun_ptr->render(g_moon);
+  //earth_ptr->render(g_earth);
+  //moon_ptr->render(g_moon);
 }
 
 // Update any accessible variable based on the current time

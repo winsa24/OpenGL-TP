@@ -8,19 +8,21 @@ out vec4 color;	  // Shader output: the color response attached to this fragment
 void main() {
 	vec3 n = normalize(fColor);
 	vec3 l = normalize(vec3(1.0, 1.0, 0.0)); // light direction vector (hard-coded just for now)
+
 // TODO: vec3 v = calculate view vector
-	vec3 v = camPos - fPosition;
+	vec3 v = normalize(camPos - fPosition);
 	
 // TODO: vec3 r = calculate reflection vector
-	vec3 r = 2 * (n * l) * n - l;
+	vec3 r = normalize(2 * dot(n, l) * n - l);
 
 // TODO: vec3 ambient = set an ambient color
-	vec3 ambient = vec3(0.3, 0.3, 0.3);
+	vec3 ambient = vec3(1.0, 0.3, 0.3);
 // TODO: vec3 diffuse = calculate the diffuse lighting
-	//vec3 diffuse = vec3(1.0) * dot(n, l);
-	vec3 diffuse = l * dot(n, l);
+	vec3 lightColor = vec3(1.0, 1.0, 1.0);	
+	vec3 diffuse = max(dot(n,l),0.0) *lightColor;
+	//vec3 diffuse = l * max(dot(n, l),0.0);
 // TODO: vec3 specular = calculate the specular lighting
-	vec3 specular = (r * v);
+	vec3 specular = 0.5 * pow(max(dot(v,r),0), 64)* lightColor;
 	
 	color = vec4(ambient + diffuse + specular, 1.0); // Building RGBA from RGB.
 

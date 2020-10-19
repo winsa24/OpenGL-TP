@@ -4,7 +4,7 @@ layout(location=0) in vec3 vPosition; // The 1st input attribute is the position
 layout(location=1) in vec3 vColor; // The 2nd input attribute is the vertex color (CPU side: glVertexAttrib 1).
 //layout(location=1) in vec3 vNormal; 
 
-uniform mat4 viewMat, projMat;
+uniform mat4 viewMat, projMat, meshMat;
 uniform vec3 camPos;
 
 
@@ -13,8 +13,8 @@ out vec3 fPosition;
 //out vec3 fNormal;
 
 void main() {
-        gl_Position = projMat * viewMat * vec4(vPosition, 1.0); // mandatory to rasterize properly
-
+        //gl_Position = projMat * viewMat * vec4(vPosition, 1.0); // mandatory to rasterize properly
+	gl_Position = projMat * viewMat * meshMat * vec4(vPosition, 1.0);
 	fColor = vColor; // will be passed to the next stage
 	fPosition = vPosition;
 	//fNormal = vNormal;
