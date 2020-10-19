@@ -137,16 +137,13 @@ public:
         glDrawElements(GL_TRIANGLES, m_triangleIndices.size(), GL_UNSIGNED_INT, 0); // Call for rendering: stream the current GPU geometry through the current GPU program
 
     };
-    //void genSphere(){
     static std::shared_ptr<Mesh> genSphere(const size_t resolution=16){
-        Mesh myMesh;
+        std::shared_ptr<Mesh> myMesh(new Mesh());
 
         float x, y, z, xy;                              // vertex position
-    //    float radius = kSize;
         float radius = 1.0f;
         float PI = 3.14159265;
         float nx, ny, nz, lengthInv = 1.0f / radius;    // vertex normal
-    //    float s, t;                                     // vertex texCoord
 
         int sectorCount = 32;
         int stackCount = 32;
@@ -169,20 +166,13 @@ public:
                 // vertex position (x, y, z)
                 x = xy * cosf(sectorAngle);             // r * cos(u) * cos(v)
                 y = xy * sinf(sectorAngle);             // r * cos(u) * sin(v)
-                myMesh.m_vertexPositions.push_back(x);
-                myMesh.m_vertexPositions.push_back(y);
-                myMesh.m_vertexPositions.push_back(z);
+                myMesh->m_vertexPositions.push_back(x);
+                myMesh->m_vertexPositions.push_back(y);
+                myMesh->m_vertexPositions.push_back(z);
 
-                //normalized vertex normal (nx, ny, nz)
-                nx = x * lengthInv;
-                ny = y * lengthInv;
-                nz = z * lengthInv;
-    //            m_vertexNormals.push_back(nx);
-    //            m_vertexNormals.push_back(ny);
-    //            m_vertexNormals.push_back(nz);
-                myMesh.m_vertexNormals.push_back(x);
-                myMesh.m_vertexNormals.push_back(y);
-                myMesh.m_vertexNormals.push_back(z);
+                myMesh->m_vertexNormals.push_back(x);
+                myMesh->m_vertexNormals.push_back(y);
+                myMesh->m_vertexNormals.push_back(z);
 
             }
         }
@@ -198,23 +188,23 @@ public:
                 // k1 => k2 => k1+1
                 if(i != 0)
                 {
-                    myMesh.m_triangleIndices.push_back(k1);
-                    myMesh.m_triangleIndices.push_back(k2);
-                    myMesh.m_triangleIndices.push_back(k1 + 1);
+                    myMesh->m_triangleIndices.push_back(k1);
+                    myMesh->m_triangleIndices.push_back(k2);
+                    myMesh->m_triangleIndices.push_back(k1 + 1);
                 }
 
                 // k1+1 => k2 => k2+1
                 if(i != (stackCount-1))
                 {
-                    myMesh.m_triangleIndices.push_back(k1 + 1);
-                    myMesh.m_triangleIndices.push_back(k2);
-                    myMesh.m_triangleIndices.push_back(k2 + 1);
+                    myMesh->m_triangleIndices.push_back(k1 + 1);
+                    myMesh->m_triangleIndices.push_back(k2);
+                    myMesh->m_triangleIndices.push_back(k2 + 1);
                 }
             }
         }
 
-        std::shared_ptr<Mesh> sptr = std::make_shared<Mesh>(myMesh);
-        return sptr;
+
+        return myMesh;
     }; // should generate a unit sphere
 // ...
 private:
@@ -241,8 +231,7 @@ const static float kRadOrbitMoon = 2;
 glm::mat4 g_sun, g_earth, g_moon;
 //Mesh sphere;
 //Mesh sun, earth, moon;
-std::shared_ptr<Mesh> sun_ptr, moon_ptr;
-std::shared_ptr<Mesh> earth_ptr;
+std::shared_ptr<Mesh> sun_ptr, earth_ptr, moon_ptr;
 
 GLuint loadTextureFromFileToGPU(const std::string &filename) {
   int width, height, numComponents;
@@ -361,219 +350,33 @@ void initGPUprogram() {
 }
 
 
-void task1(){
-
-        g_vertexPositions.push_back(0.0);
-        g_vertexPositions.push_back(0);
-        g_vertexPositions.push_back(0);
-        g_vertexPositions.push_back(1.0);
-        g_vertexPositions.push_back(0);
-        g_vertexPositions.push_back(0);
-        g_vertexPositions.push_back(0.0);
-        g_vertexPositions.push_back(1.0);
-        g_vertexPositions.push_back(0);
-    //    g_vertexPositions = { // the array of vertex positions [x0, y0, z0, x1, y1, z1, ...]
-    //        0.f, 0.f, 0.f,
-    //        1.f, 0.f, 0.f,
-    //        0.f, 1.f, 0.f
-    //    };
-        g_triangleIndices.push_back(0);
-        g_triangleIndices.push_back(1);
-        g_triangleIndices.push_back(2);
-        //g_triangleIndices = { 0, 1, 2 }; // indices just for one triangle
-
-        g_vertexColors.push_back(1.0);
-        g_vertexColors.push_back(1.0);
-        g_vertexColors.push_back(0.0);
-
-        g_vertexColors.push_back(0.0);
-        g_vertexColors.push_back(1.0);
-        g_vertexColors.push_back(0.0);
-
-        g_vertexColors.push_back(0.0);
-        g_vertexColors.push_back(0.0);
-        g_vertexColors.push_back(1.0);
 
 
-    //    g_vertexColors = { // the array of vertex colors [r0, g0, b0, r1, g1, b1, ...]
-    //    1.f, 0.f, 0.f,
-    //    0.f, 1.f, 0.f,
-    //    0.f, 0.f, 1.f
-    //    };
-}
-void task2(){
-    float x, y, z, xy;                              // vertex position
-    float radius = 1.0f;
-    float PI = 3.14159265;
-//    float nx, ny, nz, lengthInv = 1.0f / radius;    // vertex normal
-//    float s, t;                                     // vertex texCoord
-
-    int sectorCount = 16;
-    int stackCount = 16;
-    float sectorStep = 2 * PI / sectorCount;
-    float stackStep = PI / stackCount;
-    float sectorAngle, stackAngle;
-
-    for(int i = 0; i <= stackCount; ++i)
-    {
-        stackAngle = PI / 2 - i * stackStep;        // starting from pi/2 to -pi/2
-        xy = radius * cosf(stackAngle);             // r * cos(u)
-        z = radius * sinf(stackAngle);              // r * sin(u)
-
-        // add (sectorCount+1) vertices per stack
-        // the first and last vertices have same position and normal, but different tex coords
-        for(int j = 0; j <= sectorCount; ++j)
-        {
-            sectorAngle = j * sectorStep;           // starting from 0 to 2pi
-
-            // vertex position (x, y, z)
-            x = xy * cosf(sectorAngle);             // r * cos(u) * cos(v)
-            y = xy * sinf(sectorAngle);             // r * cos(u) * sin(v)
-            g_vertexPositions.push_back(x);
-            g_vertexPositions.push_back(y);
-            g_vertexPositions.push_back(z);
-//            g_vertexColors.push_back(x);
-//            g_vertexColors.push_back(y);
-//            g_vertexColors.push_back(z);
-            g_vertexColors.push_back(0);
-            g_vertexColors.push_back(0);
-            g_vertexColors.push_back(0);
-//            vertices.push_back(x);
-//            vertices.push_back(y);
-//            vertices.push_back(z);
-
-            // normalized vertex normal (nx, ny, nz)
-//            nx = x * lengthInv;
-//            ny = y * lengthInv;
-//            nz = z * lengthInv;
-//            normals.push_back(nx);
-//            normals.push_back(ny);
-//            normals.push_back(nz);
-
-//            // vertex tex coord (s, t) range between [0, 1]
-//            s = (float)j / sectorCount;
-//            t = (float)i / stackCount;
-//            texCoords.push_back(s);
-//            texCoords.push_back(t);
-
-        }
-    }
-    int k1, k2;
-    for(int i = 0; i < stackCount; ++i)
-    {
-        k1 = i * (sectorCount + 1);     // beginning of current stack
-        k2 = k1 + sectorCount + 1;      // beginning of next stack
-
-        for(int j = 0; j < sectorCount; ++j, ++k1, ++k2)
-        {
-            // 2 triangles per sector excluding first and last stacks
-            // k1 => k2 => k1+1
-            if(i != 0)
-            {
-                g_triangleIndices.push_back(k1);
-                g_triangleIndices.push_back(k2);
-                g_triangleIndices.push_back(k1 + 1);
-            }
-
-            // k1+1 => k2 => k2+1
-            if(i != (stackCount-1))
-            {
-                g_triangleIndices.push_back(k1 + 1);
-                g_triangleIndices.push_back(k2);
-                g_triangleIndices.push_back(k2 + 1);
-            }
-        }
-    }
-
-
-}
 // Define your mesh(es) in the CPU memory
 void initCPUgeometry() {
   // TODO:
-
-    //task1();
-    //task2();
-
-    //sun_ptr->genSphere();
     sun_ptr = Mesh::genSphere();
-    //earth_ptr = Mesh::genSphere();
-    //moon_ptr = Mesh::genSphere();
-    //sun.genSphere();
-    //sphere.genSphere();
-
+//    earth_ptr = Mesh::genSphere();
+//    moon_ptr = Mesh::genSphere();
 }
 
 void initGPUgeometry() {
-  // Create a single handle that joins together attributes (vertex positions,
-  // normals) and connectivity (triangles indices)
-  //glCreateVertexArrays(1, &g_vao);
-
-  glGenVertexArrays(1, &g_vao); // If your system doesn't support OpenGL 4.5, you should use this instead of glCreateVertexArrays.
-  glBindVertexArray(g_vao);
-
-  // Generate a GPU buffer to store the positions of the vertices
-  size_t vertexBufferSize = sizeof(float)*g_vertexPositions.size(); // Gather the size of the buffer from the CPU-side vector
-//  glCreateBuffers(1, &g_posVbo);
-//  glNamedBufferStorage(g_posVbo, vertexBufferSize, NULL, GL_DYNAMIC_STORAGE_BIT); // Create a data storage on the GPU
-//  glNamedBufferSubData(g_posVbo, 0, vertexBufferSize, g_vertexPositions.data()); // Fill the data storage from a CPU array
-//  glBindBuffer(GL_ARRAY_BUFFER, g_posVbo);
-//  glEnableVertexAttribArray(0);
-//  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), 0);
-  
-
-  // If your system doesn't support OpenGL 4.5, you should replace the upper code block with this.
-  glGenBuffers(1, &g_posVbo);
-  glBindBuffer(GL_ARRAY_BUFFER, g_posVbo);
-  glBufferData(GL_ARRAY_BUFFER, vertexBufferSize, g_vertexPositions.data(), GL_DYNAMIC_READ);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), 0);
-
-
-
-  size_t colorBufferSize = sizeof(float)*g_vertexColors.size();
-  glGenBuffers(1, &g_colorVbo);
-  glBindBuffer(GL_ARRAY_BUFFER, g_colorVbo);
-  glBufferData(GL_ARRAY_BUFFER, colorBufferSize, g_vertexColors.data(), GL_DYNAMIC_READ);
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), 0);
-
-  glBindVertexArray(0); // deactivate the VAO for now, will be activated at rendering time
-
-  //glBindVertexArray(1); // deactivate the VAO for now, will be activated at rendering time
-
-
-  // Same for the index buffer that stores the list of indices of the
-  // triangles forming the mesh
-  size_t indexBufferSize = sizeof(unsigned int)*g_triangleIndices.size();
-//  glCreateBuffers(1, &g_ibo);
-//  glNamedBufferStorage(g_ibo, indexBufferSize, NULL, GL_DYNAMIC_STORAGE_BIT);
-//  glNamedBufferSubData(g_ibo, 0, indexBufferSize, g_triangleIndices.data());
-
-  // As before, for older OpenGL, use this.
-  glGenBuffers(1, &g_ibo);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_ibo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSize, g_triangleIndices.data(), GL_DYNAMIC_READ);
-
   //sphere.init();
   sun_ptr->init();
-  //earth_ptr->init();
-  //moon_ptr->init();
-
+//  earth_ptr->init();
+//  moon_ptr->init();
 }
 
 void initCamera() {
-  //std::cout << "qwr5" << std::endl;
-  //glm::mat4 g_sun, g_earth, g_moon;
 
   int width, height;
   glfwGetWindowSize(g_window, &width, &height);
   g_camera.setAspectRatio(static_cast<float>(width)/static_cast<float>(height));
 
-  g_camera.setPosition(glm::vec3(0.0, 0.0, 3.0));
+  g_camera.setPosition(glm::vec3(0.0, 0.0, 20.0));
 
   g_camera.setNear(0.1);
   g_camera.setFar(80.1);
-
 
 }
 
@@ -588,7 +391,6 @@ void init() {
 
 void clear() {
   glDeleteProgram(g_program);
-
   glfwDestroyWindow(g_window);
   glfwTerminate();
 }
@@ -607,25 +409,21 @@ void render() {
   const glm::vec3 camPosition = g_camera.getPosition();
   glUniform3f(glGetUniformLocation(g_program, "camPos"), camPosition[0], camPosition[1], camPosition[2]);
 
-  glBindVertexArray(g_vao);     // bind the VAO storing geometry data
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, g_ibo); // bind the IBO storing geometry data
-  glDrawElements(GL_TRIANGLES, g_triangleIndices.size(), GL_UNSIGNED_INT, 0); // Call for rendering: stream the current GPU geometry through the current GPU program
-
   g_sun = glm::mat4(1.0);
   g_sun = glm::translate(g_sun, glm::vec3(0.0f, 0.0f, 0.0f));
   g_sun = glm::scale(g_sun, glm::vec3(0.1f, 0.1f, 0.1f));
   g_earth = glm::mat4(1.0);
   g_earth = glm::translate(g_earth, glm::vec3(0.2f, 0.0f, 0.0f));
-  g_earth = glm::scale(g_earth, glm::vec3(0.05f, 0.05f, 0.05f));
+  g_earth = glm::scale(g_earth, glm::vec3(0.5f, 0.5f, 0.5f));
   g_moon = glm::mat4(1.0);
   g_moon = glm::translate(g_moon, glm::vec3(1.0f, 0.0f, 0.0f));
-  g_moon = glm::scale(g_moon, glm::vec3(0.025f, 0.025f, 0.025f));
+  g_moon = glm::scale(g_moon, glm::vec3(0.25f, 0.25f, 0.25f));
 
   sun_ptr->render(g_sun);
   sun_ptr->render(g_earth);
   sun_ptr->render(g_moon);
-  //earth_ptr->render(g_earth);
-  //moon_ptr->render(g_moon);
+//  earth_ptr->render(g_earth);
+//  moon_ptr->render(g_moon);
 }
 
 // Update any accessible variable based on the current time
