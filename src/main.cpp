@@ -111,7 +111,7 @@ public:
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), 0);
 
-        glBindVertexArray(0); // deactivate the VAO for now, will be activated at rendering time
+        //glBindVertexArray(0); // deactivate the VAO for now, will be activated at rendering time
 
         // Same for the index buffer that stores the list of indices of the
         // triangles forming the mesh
@@ -124,13 +124,9 @@ public:
     };
     void render(glm::mat4 g_mesh){// should be called in the main rendering loop
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Erase the color and z buffers.
-
-        //const glm::mat4 viewMatrix = g_sphere.computeViewMatrix();
-//        const glm::mat4 projMatrix = g_camera.computeProjectionMatrix();
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Erase the color and z buffers.
 
         glUniformMatrix4fv(glGetUniformLocation(g_program, "meshMat"), 1, GL_FALSE, glm::value_ptr(g_mesh)); // compute the view matrix of the camera and pass it to the GPU program
-//        glUniformMatrix4fv(glGetUniformLocation(g_program, "projMat"), 1, GL_FALSE, glm::value_ptr(projMatrix)); // compute the projection matrix of the camera and pass it to the GPU program
 
         glBindVertexArray(m_vao);     // bind the VAO storing geometry data
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo); // bind the IBO storing geometry data
@@ -138,7 +134,9 @@ public:
 
     };
     static std::shared_ptr<Mesh> genSphere(const size_t resolution=16){
-        std::shared_ptr<Mesh> myMesh(new Mesh());
+        //std::shared_ptr<Mesh> myMesh(new Mesh());
+        //Mesh tmp;
+        std::shared_ptr<Mesh> myMesh = std::make_shared<Mesh>();
 
         float x, y, z, xy;                              // vertex position
         float radius = 1.0f;
@@ -373,7 +371,7 @@ void initCamera() {
   glfwGetWindowSize(g_window, &width, &height);
   g_camera.setAspectRatio(static_cast<float>(width)/static_cast<float>(height));
 
-  g_camera.setPosition(glm::vec3(0.0, 0.0, 20.0));
+  g_camera.setPosition(glm::vec3(0.0, 0.0, 30.0));
 
   g_camera.setNear(0.1);
   g_camera.setFar(80.1);
@@ -411,12 +409,12 @@ void render() {
 
   g_sun = glm::mat4(1.0);
   g_sun = glm::translate(g_sun, glm::vec3(0.0f, 0.0f, 0.0f));
-  g_sun = glm::scale(g_sun, glm::vec3(0.1f, 0.1f, 0.1f));
+  g_sun = glm::scale(g_sun, glm::vec3(1.0f, 1.0f, 1.0f));
   g_earth = glm::mat4(1.0);
-  g_earth = glm::translate(g_earth, glm::vec3(0.2f, 0.0f, 0.0f));
+  g_earth = glm::translate(g_earth, glm::vec3(10.0f, 0.0f, 0.0f));
   g_earth = glm::scale(g_earth, glm::vec3(0.5f, 0.5f, 0.5f));
   g_moon = glm::mat4(1.0);
-  g_moon = glm::translate(g_moon, glm::vec3(1.0f, 0.0f, 0.0f));
+  g_moon = glm::translate(g_moon, glm::vec3(12.0f, 0.0f, 0.0f));
   g_moon = glm::scale(g_moon, glm::vec3(0.25f, 0.25f, 0.25f));
 
   sun_ptr->render(g_sun);
