@@ -213,6 +213,7 @@ private:
     GLuint m_posVbo = 0;
     GLuint m_normalVbo = 0;
     GLuint m_ibo = 0;
+    
 // ...
 
 };
@@ -371,7 +372,7 @@ void initCamera() {
   glfwGetWindowSize(g_window, &width, &height);
   g_camera.setAspectRatio(static_cast<float>(width)/static_cast<float>(height));
 
-  g_camera.setPosition(glm::vec3(0.0, 0.0, 30.0));
+  g_camera.setPosition(glm::vec3(0.0, 0.0, 20.0));
 
   g_camera.setNear(0.1);
   g_camera.setFar(80.1);
@@ -410,12 +411,12 @@ void render() {
   g_sun = glm::mat4(1.0);
   g_sun = glm::translate(g_sun, glm::vec3(0.0f, 0.0f, 0.0f));
   g_sun = glm::scale(g_sun, glm::vec3(1.0f, 1.0f, 1.0f));
-  g_earth = glm::mat4(1.0);
-  g_earth = glm::translate(g_earth, glm::vec3(10.0f, 0.0f, 0.0f));
-  g_earth = glm::scale(g_earth, glm::vec3(0.5f, 0.5f, 0.5f));
-  g_moon = glm::mat4(1.0);
-  g_moon = glm::translate(g_moon, glm::vec3(12.0f, 0.0f, 0.0f));
-  g_moon = glm::scale(g_moon, glm::vec3(0.25f, 0.25f, 0.25f));
+//  g_earth = glm::mat4(1.0);
+//  g_earth = glm::scale(g_earth, glm::vec3(0.5f, 0.5f, 0.5f));
+//  g_earth = glm::translate(g_earth, glm::vec3(10.0f, 0.0f, 0.0f));
+//  g_moon = glm::mat4(1.0);
+//  g_moon = glm::scale(g_moon, glm::vec3(0.25f, 0.25f, 0.25f));
+//  g_moon = glm::translate(g_moon, glm::vec3(12.0f, 0.0f, 0.0f));
 
   sun_ptr->render(g_sun);
   sun_ptr->render(g_earth);
@@ -427,7 +428,23 @@ void render() {
 // Update any accessible variable based on the current time
 void update(const float currentTimeInSec) {
 //   std::cout << currentTimeInSec << std::endl;
+    
+//    float earthOrbital = 20 * currentTimeInSec;
+    g_earth = glm::mat4(1.0);
+    glm::mat4 g_earth_scale = glm::scale(glm::mat4(1.0), glm::vec3(0.5f, 0.5f, 0.5f));
+    glm::mat4 g_earth_tilt = glm::rotate(glm::mat4(1.0), glm::radians(23.5f), glm::vec3(0.0, 0.0, 1.0));
+    glm::mat4 g_earth_rotate = glm::rotate(glm::mat4(1.0), glm::radians(40 * currentTimeInSec), glm::vec3(0.0, 1.0, 0.0));
+    glm::mat4 g_earth_translate = glm::translate(glm::mat4(1.0), glm::vec3(-cos(glm::radians(20 * currentTimeInSec)) * 10 , 0.0f,
+                                                                           sin(glm::radians(20 * currentTimeInSec)) * 10));
+    g_earth =  g_earth_translate * g_earth_tilt * g_earth_rotate * g_earth_scale * g_earth;
 
+    g_moon = glm::mat4(1.0);
+    glm::mat4 g_moon_scale = glm::scale(glm::mat4(1.0), glm::vec3(0.25f, 0.25f, 0.25f));
+    glm::mat4 g_moon_rotate = glm::rotate(glm::mat4(1.0), glm::radians(80 * currentTimeInSec), glm::vec3(0.0, 1.0, 0.0));
+    glm::mat4 g_moon_translate = glm::translate(glm::mat4(1.0), glm::vec3(-cos(glm::radians(20*currentTimeInSec)) * 10 -cos(glm::radians(80 * currentTimeInSec)) * 2  , 0.0f, sin(glm::radians(20*currentTimeInSec)) * 10 + sin(glm::radians(80 * currentTimeInSec)) * 2 ));
+    g_moon = g_moon_translate * g_moon_rotate * g_moon_scale;
+    
+    
 }
 
 int main(int argc, char ** argv) {
