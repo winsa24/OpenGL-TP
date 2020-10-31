@@ -110,6 +110,13 @@ public:
         glBufferData(GL_ARRAY_BUFFER, colorBufferSize, m_vertexNormals.data(), GL_DYNAMIC_READ);
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3*sizeof(GLfloat), 0);
+        
+        size_t texBufferSize = sizeof(float)*m_vertexTexCoords.size();
+        glGenBuffers(1, &m_texCoordVbo);
+        glBindBuffer(GL_ARRAY_BUFFER, m_texCoordVbo);
+        glBufferData(GL_ARRAY_BUFFER, texBufferSize, m_vertexTexCoords.data(), GL_DYNAMIC_READ);
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2*sizeof(GLfloat), 0);
 
         //glBindVertexArray(0); // deactivate the VAO for now, will be activated at rendering time
 
@@ -122,8 +129,12 @@ public:
 
 
     };
-    void render(glm::mat4 g_mesh, glm::vec3 g_color){// should be called in the main rendering loop
+    void render(glm::mat4 g_mesh, glm::vec3 g_color, GLuint g_TexID){// should be called in the main rendering loop
 
+        glActiveTexture(GL_TEXTURE0);
+        glUniform1i(glGetUniformLocation(g_program, "material.albedoTex"), 0);
+        glBindTexture(GL_TEXTURE_2D, g_TexID);
+        
         //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Erase the color and z buffers.
 
         glUniformMatrix4fv(glGetUniformLocation(g_program, "meshMat"), 1, GL_FALSE, glm::value_ptr(g_mesh)); // compute the view matrix of the camera and pass it to the GPU program
@@ -132,6 +143,8 @@ public:
         glBindVertexArray(m_vao);     // bind the VAO storing geometry data
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo); // bind the IBO storing geometry data
         glDrawElements(GL_TRIANGLES, m_triangleIndices.size(), GL_UNSIGNED_INT, 0); // Call for rendering: stream the current GPU geometry through the current GPU program
+        
+        
 
     };
     static std::shared_ptr<Mesh> genSphere(const size_t resolution=16){
@@ -143,6 +156,7 @@ public:
         float radius = 1.0f;
         float PI = 3.14159265;
         float nx, ny, nz, lengthInv = 1.0f / radius;    // vertex normal
+        float s,t;
 
         int sectorCount = 32;
         int stackCount = 32;
@@ -173,6 +187,11 @@ public:
                 myMesh->m_vertexNormals.push_back(y);
                 myMesh->m_vertexNormals.push_back(z);
 
+                // vertex tex coord (s, t) range between [0, 1]
+                s = (float)j / sectorCount;
+                t = (float)i / stackCount;
+                myMesh->m_vertexTexCoords.push_back(s);
+                myMesh->m_vertexTexCoords.push_back(t);
             }
         }
         int k1, k2;
@@ -210,6 +229,8 @@ private:
     std::vector<float> m_vertexPositions;
     std::vector<float> m_vertexNormals;
     std::vector<unsigned int> m_triangleIndices;
+    std::vector<float> m_vertexTexCoords;
+    GLuint m_texCoordVbo = 0;
     GLuint m_vao = 0;
     GLuint m_posVbo = 0;
     GLuint m_normalVbo = 0;
@@ -244,10 +265,19 @@ GLuint loadTextureFromFileToGPU(const std::string &filename) {
 
   GLuint texID;
   // TODO:
+  glGenTextures(1, &texID); // generate an OpenGL texture container
+  glBindTexture(GL_TEXTURE_2D, texID); // activate the texture
+  // The following lines setup the texture filtering option and repeat mode; check www.opengl.org for details.
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  // fills the GPU texture with the data stored in the CPU image
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 
   // Freeing the now useless CPU memory
   stbi_image_free(data);
-  glBindTexture(GL_TEXTURE_2D, 0); // unbind the texture
+  //glBindTexture(GL_TEXTURE_2D, 0); // unbind the texture
 
   return texID;
 }
@@ -409,9 +439,9 @@ void render() {
   const glm::vec3 camPosition = g_camera.getPosition();
   glUniform3f(glGetUniformLocation(g_program, "camPos"), camPosition[0], camPosition[1], camPosition[2]);
 
-  g_sun = glm::mat4(1.0);
-  g_sun = glm::translate(g_sun, glm::vec3(0.0f, 0.0f, 0.0f));
-  g_sun = glm::scale(g_sun, glm::vec3(1.0f, 1.0f, 1.0f));
+//  g_sun = glm::mat4(1.0);
+//  g_sun = glm::translate(g_sun, glm::vec3(0.0f, 0.0f, 0.0f));
+//  g_sun = glm::scale(g_sun, glm::vec3(1.0f, 1.0f, 1.0f));
   glm::vec3  g_sun_color = glm::vec3(1.0f, 0.0f, 0.0f);
   glm::vec3  g_earth_color = glm::vec3(0.0f, 1.0f, 0.0f);
   glm::vec3  g_moon_color = glm::vec3(0.0f, 0.0f, 1.0f);
@@ -421,17 +451,27 @@ void render() {
 //  g_moon = glm::mat4(1.0);
 //  g_moon = glm::scale(g_moon, glm::vec3(0.25f, 0.25f, 0.25f));
 //  g_moon = glm::translate(g_moon, glm::vec3(12.0f, 0.0f, 0.0f));
+    
+  // ...
+  GLuint g_sunTexID = loadTextureFromFileToGPU("media/sun.jpg");
+  GLuint g_earthTexID = loadTextureFromFileToGPU("media/earth.jpg");
+  GLuint g_moonTexID = loadTextureFromFileToGPU("media/moon.jpg");
 
-  sun_ptr->render(g_sun, g_sun_color);
-  sun_ptr->render(g_earth, g_earth_color);
-  sun_ptr->render(g_moon, g_moon_color);
+  sun_ptr->render(g_sun, g_sun_color, g_sunTexID);
+  sun_ptr->render(g_earth, g_earth_color, g_earthTexID);
+  sun_ptr->render(g_moon, g_moon_color, g_moonTexID);
 //  earth_ptr->render(g_earth);
 //  moon_ptr->render(g_moon);
+    
+    
 }
 
 // Update any accessible variable based on the current time
 void update(const float currentTimeInSec) {
 //   std::cout << currentTimeInSec << std::endl;
+    g_sun = glm::mat4(1.0);
+    g_sun = glm::translate(g_sun, glm::vec3(0.0f, 0.0f, 0.0f));
+    g_sun = glm::scale(g_sun, glm::vec3(1.0f, 1.0f, 1.0f));
     
 //    float earthOrbital = 20 * currentTimeInSec;
     g_earth = glm::mat4(1.0);
