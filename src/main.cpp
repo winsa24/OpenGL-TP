@@ -122,11 +122,12 @@ public:
 
 
     };
-    void render(glm::mat4 g_mesh){// should be called in the main rendering loop
+    void render(glm::mat4 g_mesh, glm::vec3 g_color){// should be called in the main rendering loop
 
         //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Erase the color and z buffers.
 
         glUniformMatrix4fv(glGetUniformLocation(g_program, "meshMat"), 1, GL_FALSE, glm::value_ptr(g_mesh)); // compute the view matrix of the camera and pass it to the GPU program
+        glUniform3fv(glGetUniformLocation(g_program, "meshcolor"), 1, glm::value_ptr(g_color));
 
         glBindVertexArray(m_vao);     // bind the VAO storing geometry data
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo); // bind the IBO storing geometry data
@@ -411,6 +412,9 @@ void render() {
   g_sun = glm::mat4(1.0);
   g_sun = glm::translate(g_sun, glm::vec3(0.0f, 0.0f, 0.0f));
   g_sun = glm::scale(g_sun, glm::vec3(1.0f, 1.0f, 1.0f));
+  glm::vec3  g_sun_color = glm::vec3(1.0f, 0.0f, 0.0f);
+  glm::vec3  g_earth_color = glm::vec3(0.0f, 1.0f, 0.0f);
+  glm::vec3  g_moon_color = glm::vec3(0.0f, 0.0f, 1.0f);
 //  g_earth = glm::mat4(1.0);
 //  g_earth = glm::scale(g_earth, glm::vec3(0.5f, 0.5f, 0.5f));
 //  g_earth = glm::translate(g_earth, glm::vec3(10.0f, 0.0f, 0.0f));
@@ -418,9 +422,9 @@ void render() {
 //  g_moon = glm::scale(g_moon, glm::vec3(0.25f, 0.25f, 0.25f));
 //  g_moon = glm::translate(g_moon, glm::vec3(12.0f, 0.0f, 0.0f));
 
-  sun_ptr->render(g_sun);
-  sun_ptr->render(g_earth);
-  sun_ptr->render(g_moon);
+  sun_ptr->render(g_sun, g_sun_color);
+  sun_ptr->render(g_earth, g_earth_color);
+  sun_ptr->render(g_moon, g_moon_color);
 //  earth_ptr->render(g_earth);
 //  moon_ptr->render(g_moon);
 }

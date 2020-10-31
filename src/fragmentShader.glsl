@@ -2,6 +2,7 @@
 uniform vec3 camPos;
 in vec3 fPosition;
 in vec3 fColor;
+in vec3 meshColor;
 //in vec3 fNormal
 out vec4 color;	  // Shader output: the color response attached to this fragment
 
@@ -16,7 +17,8 @@ void main() {
 	vec3 r = normalize(2 * dot(n, l) * n - l);
 
 // TODO: vec3 ambient = set an ambient color
-	vec3 ambient = vec3(1.0, 0.3, 0.3);
+//	vec3 ambient = vec3(1.0, 0.0, 0.0);
+    vec3 ambient = meshColor;
 // TODO: vec3 diffuse = calculate the diffuse lighting
 	vec3 lightColor = vec3(1.0, 1.0, 1.0);	
 	vec3 diffuse = max(dot(n,l),0.0) *lightColor;
