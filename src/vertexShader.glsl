@@ -16,7 +16,7 @@ out vec2 fTexCoord;
 //out vec3 fNormal;
 
 void main() {
-        //gl_Position = projMat * viewMat * vec4(vPosition, 1.0); // mandatory to rasterize properly
+    //gl_Position = projMat * viewMat * vec4(vPosition, 1.0); // mandatory to rasterize properly
 	gl_Position = projMat * viewMat * meshMat * vec4(vPosition, 1.0);
 	fColor = vColor; // will be passed to the next stage
 	fPosition = vPosition;

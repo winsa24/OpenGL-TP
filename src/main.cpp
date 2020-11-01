@@ -96,8 +96,6 @@ public:
 
         // Generate a GPU buffer to store the positions of the vertices
         size_t vertexBufferSize = sizeof(float)*m_vertexPositions.size(); // Gather the size of the buffer from the CPU-side vector
-
-        // If your system doesn't support OpenGL 4.5, you should replace the upper code block with this.
         glGenBuffers(1, &m_posVbo);
         glBindBuffer(GL_ARRAY_BUFFER, m_posVbo);
         glBufferData(GL_ARRAY_BUFFER, vertexBufferSize, m_vertexPositions.data(), GL_DYNAMIC_READ);
@@ -126,11 +124,9 @@ public:
         glGenBuffers(1, &m_ibo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSize, m_triangleIndices.data(), GL_DYNAMIC_READ);
-
-
     };
     void render(glm::mat4 g_mesh, glm::vec3 g_color, GLuint g_TexID){// should be called in the main rendering loop
-
+//    void render(glm::mat4 g_mesh, glm::vec3 g_color){// should be called in the main rendering loop
         glActiveTexture(GL_TEXTURE0);
         glUniform1i(glGetUniformLocation(g_program, "material.albedoTex"), 0);
         glBindTexture(GL_TEXTURE_2D, g_TexID);
@@ -143,8 +139,6 @@ public:
         glBindVertexArray(m_vao);     // bind the VAO storing geometry data
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo); // bind the IBO storing geometry data
         glDrawElements(GL_TRIANGLES, m_triangleIndices.size(), GL_UNSIGNED_INT, 0); // Call for rendering: stream the current GPU geometry through the current GPU program
-        
-        
 
     };
     static std::shared_ptr<Mesh> genSphere(const size_t resolution=16){
@@ -153,26 +147,22 @@ public:
         std::shared_ptr<Mesh> myMesh = std::make_shared<Mesh>();
 
         float x, y, z, xy;                              // vertex position
-        float radius = 1.0f;
         float PI = 3.14159265;
-        float nx, ny, nz, lengthInv = 1.0f / radius;    // vertex normal
         float s,t;
 
-        int sectorCount = 32;
-        int stackCount = 32;
-        float sectorStep = 2 * PI / sectorCount;
-        float stackStep = PI / stackCount;
+        float sectorStep = 2 * PI / resolution;
+        float stackStep = PI / resolution;
         float sectorAngle, stackAngle;
 
-        for(int i = 0; i <= stackCount; ++i)
+        for(int i = 0; i <= resolution; ++i)
         {
             stackAngle = PI / 2 - i * stackStep;        // starting from pi/2 to -pi/2
-            xy = radius * cosf(stackAngle);             // r * cos(u)
-            z = radius * sinf(stackAngle);              // r * sin(u)
+            xy = 1.0f * cosf(stackAngle);             // r * cos(u)
+            z = 1.0f * sinf(stackAngle);              // r * sin(u)
 
             // add (sectorCount+1) vertices per stack
             // the first and last vertices have same position and normal, but different tex coords
-            for(int j = 0; j <= sectorCount; ++j)
+            for(int j = 0; j <= resolution; ++j)
             {
                 sectorAngle = j * sectorStep;           // starting from 0 to 2pi
 
@@ -183,24 +173,25 @@ public:
                 myMesh->m_vertexPositions.push_back(y);
                 myMesh->m_vertexPositions.push_back(z);
 
+                // normalized vertex normal
                 myMesh->m_vertexNormals.push_back(x);
                 myMesh->m_vertexNormals.push_back(y);
                 myMesh->m_vertexNormals.push_back(z);
 
                 // vertex tex coord (s, t) range between [0, 1]
-                s = (float)j / sectorCount;
-                t = (float)i / stackCount;
+                s = (float)j / resolution;
+                t = (float)i / resolution;
                 myMesh->m_vertexTexCoords.push_back(s);
                 myMesh->m_vertexTexCoords.push_back(t);
             }
         }
         int k1, k2;
-        for(int i = 0; i < stackCount; ++i)
+        for(int i = 0; i < resolution; ++i)
         {
-            k1 = i * (sectorCount + 1);     // beginning of current stack
-            k2 = k1 + sectorCount + 1;      // beginning of next stack
+            k1 = i * (resolution + 1);     // beginning of current stack
+            k2 = k1 + resolution + 1;      // beginning of next stack
 
-            for(int j = 0; j < sectorCount; ++j, ++k1, ++k2)
+            for(int j = 0; j < resolution; ++j, ++k1, ++k2)
             {
                 // 2 triangles per sector excluding first and last stacks
                 // k1 => k2 => k1+1
@@ -212,7 +203,7 @@ public:
                 }
 
                 // k1+1 => k2 => k2+1
-                if(i != (stackCount-1))
+                if(i != (resolution-1))
                 {
                     myMesh->m_triangleIndices.push_back(k1 + 1);
                     myMesh->m_triangleIndices.push_back(k2);
@@ -220,8 +211,6 @@ public:
                 }
             }
         }
-
-
         return myMesh;
     }; // should generate a unit sphere
 // ...
@@ -235,11 +224,7 @@ private:
     GLuint m_posVbo = 0;
     GLuint m_normalVbo = 0;
     GLuint m_ibo = 0;
-    
-// ...
-
 };
-//void Mesh:: genSphere(){
 
 
 // Constants
@@ -250,8 +235,6 @@ const static float kRadOrbitEarth = 10;
 const static float kRadOrbitMoon = 2;
 // Model transformation matrices
 glm::mat4 g_sun, g_earth, g_moon;
-//Mesh sphere;
-//Mesh sun, earth, moon;
 std::shared_ptr<Mesh> sun_ptr, earth_ptr, moon_ptr;
 
 GLuint loadTextureFromFileToGPU(const std::string &filename) {
@@ -380,21 +363,14 @@ void initGPUprogram() {
 }
 
 
-
-
 // Define your mesh(es) in the CPU memory
 void initCPUgeometry() {
   // TODO:
-    sun_ptr = Mesh::genSphere();
-//    earth_ptr = Mesh::genSphere();
-//    moon_ptr = Mesh::genSphere();
+   sun_ptr = Mesh::genSphere();
 }
 
 void initGPUgeometry() {
-  //sphere.init();
   sun_ptr->init();
-//  earth_ptr->init();
-//  moon_ptr->init();
 }
 
 void initCamera() {
@@ -403,7 +379,7 @@ void initCamera() {
   glfwGetWindowSize(g_window, &width, &height);
   g_camera.setAspectRatio(static_cast<float>(width)/static_cast<float>(height));
 
-  g_camera.setPosition(glm::vec3(0.0, 0.0, 20.0));
+  g_camera.setPosition(glm::vec3(0.0, 0.0, 30.0));
 
   g_camera.setNear(0.1);
   g_camera.setFar(80.1);
@@ -439,30 +415,16 @@ void render() {
   const glm::vec3 camPosition = g_camera.getPosition();
   glUniform3f(glGetUniformLocation(g_program, "camPos"), camPosition[0], camPosition[1], camPosition[2]);
 
-//  g_sun = glm::mat4(1.0);
-//  g_sun = glm::translate(g_sun, glm::vec3(0.0f, 0.0f, 0.0f));
-//  g_sun = glm::scale(g_sun, glm::vec3(1.0f, 1.0f, 1.0f));
   glm::vec3  g_sun_color = glm::vec3(1.0f, 0.0f, 0.0f);
   glm::vec3  g_earth_color = glm::vec3(0.0f, 1.0f, 0.0f);
   glm::vec3  g_moon_color = glm::vec3(0.0f, 0.0f, 1.0f);
-//  g_earth = glm::mat4(1.0);
-//  g_earth = glm::scale(g_earth, glm::vec3(0.5f, 0.5f, 0.5f));
-//  g_earth = glm::translate(g_earth, glm::vec3(10.0f, 0.0f, 0.0f));
-//  g_moon = glm::mat4(1.0);
-//  g_moon = glm::scale(g_moon, glm::vec3(0.25f, 0.25f, 0.25f));
-//  g_moon = glm::translate(g_moon, glm::vec3(12.0f, 0.0f, 0.0f));
-    
-  // ...
   GLuint g_sunTexID = loadTextureFromFileToGPU("media/sun.jpg");
   GLuint g_earthTexID = loadTextureFromFileToGPU("media/earth.jpg");
   GLuint g_moonTexID = loadTextureFromFileToGPU("media/moon.jpg");
-
+  
   sun_ptr->render(g_sun, g_sun_color, g_sunTexID);
   sun_ptr->render(g_earth, g_earth_color, g_earthTexID);
   sun_ptr->render(g_moon, g_moon_color, g_moonTexID);
-//  earth_ptr->render(g_earth);
-//  moon_ptr->render(g_moon);
-    
     
 }
 
@@ -472,8 +434,7 @@ void update(const float currentTimeInSec) {
     g_sun = glm::mat4(1.0);
     g_sun = glm::translate(g_sun, glm::vec3(0.0f, 0.0f, 0.0f));
     g_sun = glm::scale(g_sun, glm::vec3(1.0f, 1.0f, 1.0f));
-    
-//    float earthOrbital = 20 * currentTimeInSec;
+
     g_earth = glm::mat4(1.0);
     glm::mat4 g_earth_scale = glm::scale(glm::mat4(1.0), glm::vec3(0.5f, 0.5f, 0.5f));
     glm::mat4 g_earth_tilt = glm::rotate(glm::mat4(1.0), glm::radians(23.5f), glm::vec3(0.0, 0.0, 1.0));
@@ -485,10 +446,9 @@ void update(const float currentTimeInSec) {
     g_moon = glm::mat4(1.0);
     glm::mat4 g_moon_scale = glm::scale(glm::mat4(1.0), glm::vec3(0.25f, 0.25f, 0.25f));
     glm::mat4 g_moon_rotate = glm::rotate(glm::mat4(1.0), glm::radians(80 * currentTimeInSec), glm::vec3(0.0, 1.0, 0.0));
-    glm::mat4 g_moon_translate = glm::translate(glm::mat4(1.0), glm::vec3(-cos(glm::radians(20*currentTimeInSec)) * 10 -cos(glm::radians(80 * currentTimeInSec)) * 2  , 0.0f, sin(glm::radians(20*currentTimeInSec)) * 10 + sin(glm::radians(80 * currentTimeInSec)) * 2 ));
+    glm::mat4 g_moon_translate = glm::translate(glm::mat4(1.0), glm::vec3(-cos(glm::radians(20*currentTimeInSec)) * 10 -cos(glm::radians(80 * currentTimeInSec)) * 2  ,                                                            0.0f, sin(glm::radians(20*currentTimeInSec)) * 10 + sin(glm::radians(80 * currentTimeInSec)) * 2 ));
     g_moon = g_moon_translate * g_moon_rotate * g_moon_scale;
-    
-    
+      
 }
 
 int main(int argc, char ** argv) {
